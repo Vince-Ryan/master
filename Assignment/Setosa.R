@@ -19,7 +19,7 @@ petal_lngt
 petal_wdth <- mean(subset_setosa$Petal.Width)
 sepal_wdth
 
-#Total mean of versicolor species subset
+#Total mean of Setosa species subset
 setosa_mean <- c(sepal_lngt, sepal_wdth, petal_lngt, petal_wdth)
 setosa_mean
 
