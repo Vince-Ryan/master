@@ -1,0 +1,115 @@
+---
+title: "RWorksheet-4"
+author: "Vince Ryan Taghap"
+date: "2022-11-22"
+output: pdf_document
+---
+\hfill\break
+
+1.The table below shows the data about shoe size and height. 
+Create a data frame...
+
+```{r,vector = TRUE}
+shoe_table <- data.frame(
+          shoesize = c(6.5,9.0,8.5,8.5,10.5,7.0,9.5,9.0,13.0,7.5,10.5,8.5,12.0,
+                        10.5,13.0,11.5,8.5,5.0,10.0,6.5,7.5,8.5,10.5,8.5,10.5,
+                        11.0,9.0,13.0),
+          height = c(66.0,68.0,64.5,65.0,70.0,64.0,70.0,71.0,72.0,64.0,74.5,
+                      67.0,71.0,71.0,77.0,72.0,59.0,62.0,72.0,66.0,64.0,67.0,
+                      73.0,69.0,72.0,70.0,69.0,70.0), 
+         gender = c("F","F","F","F","M","F","F","F","M","F","M","F","M","M","M",
+                    "M","F","F","M","F","F","M","M","F","M","M","M","M") 
+                        )
+
+names(shoe_table) <- list("Shoe size", "Height", "Gender")
+shoe_table
+```
+\hfill\break
+a. Describe the data. 
+```{r,vector = TRUE}
+#The data shows the different shoe size among male and female in different 
+#heights.
+```
+\hfill\break
+b. Find the mean of shoe size and height of the respondents.
+Copy the codes and results.
+```{r,vector = TRUE}
+#Shoe Mean
+shoe_mean <- mean(shoe_table$`Shoe size`)
+shoe_mean
+
+
+
+#Height Mean
+height_mean <- mean(shoe_table$Height)
+height_mean
+```
+\hfill\break
+c. Is there a relationship between shoe size and height?Why? 
+```{r,vector = TRUE}
+#Yes, there is a relationship between shoe size and height, I can imagine that 
+#your shoe size is large, you are also tall. The taller the height, the bigger
+#the shoe size.
+```
+\hfill\break
+Using factor() 
+```{r,vector = TRUE}
+#examples
+Gender <- c("M","F","F","M")
+factor_Gender <- factor(Gender)
+factor_Gender
+```
+\hfill\break
+2. Construct character vector months to a factor with factor() and assign the 
+result to factor_months_vector. Print out factor_months_vector and assert that 
+R prints out the factor levels below the actual values.
+
+```{r,vector = TRUE}
+vector_months <- c("March","April","January","November","January","September",
+                   "October","September","November","August","January",
+                   "November","November","February","May","August","July",
+                   "December","August","August","September","November",
+                   "February","April")
+
+vector_months
+
+factor_months_vector <- factor(vector_months)
+factor_months_vector 
+```
+\hfill\break
+3.Then check the summary() of the months_vector and factor_months_vector. 
+Interpret the results of both vectors.Are they both equally useful in this case? 
+
+```{r,vector = TRUE}
+sum_vec <- summary(vector_months)
+sum_vec
+
+sum_fac <- summary(factor_months_vector)
+sum_fac
+```
+\hfill\break
+4. Create a vector and factor for the table below.
+```{r,vector = TRUE}
+factor_data <- c("East" = '1', "West" = '4', "North" = '3')
+factor_data
+
+new_order_data <- factor(factor_data,levels = c("East" = '1',  "West" = '4',  
+                                                "North" = '3'))
+print(new_order_data)
+```
+\hfill\break
+5. Enter the data below in Excel with file name = import_march.csv
+\hfill\break
+a. Import the excel file into the Environment Pane using read.table() function.
+Write the code.
+
+```{r,vector = TRUE}
+import <- read.table("import_march.csv", header = T, sep = ",")
+import
+```
+\hfill\break
+b. View the dataset. Write the code and its result
+```{r,vector = TRUE}
+View(import)
+```
+
