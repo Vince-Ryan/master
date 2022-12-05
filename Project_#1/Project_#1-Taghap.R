@@ -23,6 +23,8 @@ setup_twitter_oauth(consumer_key = CONSUMER_KEY,
                     access_token = ACCESS_TOKEN,
                     access_secret = ACCESS_SECRET)
 
+#Get 10000 observations "excluding retweets
+
 WildFlowerTweets <- searchTwitter("Wild Flower -filter:retweets",
                                  n=10000,
                                  since = "2022-11-26",
@@ -30,6 +32,8 @@ WildFlowerTweets <- searchTwitter("Wild Flower -filter:retweets",
                                  lang = "en",
                                  retryOnRateLimit = 120
                                  )
+
+#Plot the time series from the date created. with legends. 
 
 WildFlowerDF <- twListToDF(WildFlowerTweets)
 head(WildFlowerDF$text)[1:5]
@@ -42,18 +46,15 @@ tweetsDF <- WildFlowerDF %>%
   select(screenName,text,created,statusSource)
 tweetsDF
 
-#Plotting time series
 
-ts_plot(tweetsDF, "hours") +
-  labs(x = NULL, y = NULL,
-       title = "Frequency of tweets of Wild Flower",
-       subtitle = paste0(format(min(tweetsDF$created), "%d %B %Y"), " to ", 
-                         format(max(tweetsDF$created),"%d %B %Y")),
-       caption = "Data collected from Twitter's REST API via twitteR") +
-  theme_classic()
+ggplot(data = tweetsDF, aes(x = created)) +
+  geom_histogram(aes(fill = ..count..)) +
+  theme(legend.position = "right") +
+  xlab("Time") + ylab("Number of tweets") + 
+  scale_fill_gradient(low = "midnightblue", high = "aquamarine4")
 
-
-
+#Plot a graph (any graph you want)  based on the type of device - 
+#found in Source - that the user use. Include the legends.
 encodeSource <- function(x) {
   if(grepl(">Twitter for iPhone</a>", x)){
     "iphone"
@@ -94,7 +95,7 @@ tweet_appSource <- tweetsDF %>%
   summarize(count=n()) %>%
   arrange(desc(count)) 
 
-#Plotting the type of device 
+
 ggplot(tweetsDF[tweetsDF$tweetSource != 'others',], aes(tweetSource, fill = tweetSource)) +
   geom_bar() +
   theme(legend.position="right",
@@ -103,6 +104,8 @@ ggplot(tweetsDF[tweetsDF$tweetSource != 'others',], aes(tweetSource, fill = twee
   ylab("Number of tweets")+
   ggtitle("Tweets by Source")
 
+
+#Create a wordcloud from the screenName
 
 tweet_appScreen <- tweetsDF %>%
   select(screenName) %>%
@@ -119,7 +122,6 @@ set.seed(123)
 
 par(mar = c(0,0,0,0), mfrow = c(1,1))
 
-#Wordcloud
 wordcloud(words = namesCorpus, scale=c(3,0.5),
           max.words=500,
           random.order=FALSE,
