@@ -1,0 +1,167 @@
+---
+title: "Project 1"
+author: "Vince Ryan Taghap"
+date: "2022-12-03"
+output:
+  html_document:
+    df_print: paged
+---
+```{r,vector = TRUE}
+library(twitteR)
+library(dplyr)
+library(rtweet)
+library(ggplot2)
+library(tidytext)
+library(RColorBrewer)
+library(wordcloud)
+library(stringr)
+library(tidyr)
+library(tm)
+```
+
+```{r,vector = TRUE}
+CONSUMER_SECRET <- "PvNTAZrNQNUPf655uhQGDvqnBhEkOtdnCUChsPooSBWrMeCdj6"
+CONSUMER_KEY <- "0eKM7ywAbJIBhoc6qUtPGZ2gc"
+ACCESS_SECRET <- "qSvpFsynx6zadfrSvrTaihnqm4jfZ4XNEI6F6LwmWJ2B7"
+ACCESS_TOKEN <- "1594992291864727553-wz6TgceS7HWYmZ7Tvn05kMNFAOBkaw"
+
+```
+
+```{r,vector = TRUE}
+setup_twitter_oauth(consumer_key = CONSUMER_KEY,
+                    consumer_secret = CONSUMER_SECRET,
+                    access_token = ACCESS_TOKEN,
+                    access_secret = ACCESS_SECRET)
+```
+\hfill\break
+Get 10000 observations "excluding retweets
+```{r,vector = TRUE}
+WildFlowerTweets <- searchTwitter("Wild Flower -filter:retweets",
+                                 n=10000,
+                                 since = "2022-11-26",
+                                 until = "2022-12-02",
+                                 lang = "en",
+                                 retryOnRateLimit = 120
+                                 )
+```
+\hfill\break
+Plot the time series from the date created. with legends. 
+```{r,vector = TRUE}
+WildFlowerDF <- twListToDF(WildFlowerTweets)
+head(WildFlowerDF$text)[1:5]
+```
+
+```{r,vector = TRUE}
+save(WildFlowerDF,file = "WildFlowerDF.Rdata")
+load(file = "WildFlowerDF.Rdata")
+```
+
+```{r,vector = TRUE}
+tweetsDF <- WildFlowerDF %>%
+  select(screenName,text,created,statusSource)
+tweetsDF
+```
+\hfill\break
+\hfill\break
+
+```{r,vector = TRUE}
+
+ggplot(data = tweetsDF, aes(x = created)) +
+  geom_histogram(aes(fill = ..count..)) +
+  theme(legend.position = "right") +
+  xlab("Time") + ylab("Number of tweets") + 
+  scale_fill_gradient(low = "midnightblue", high = "aquamarine4")
+
+
+```
+
+Plot a graph (any graph you want)  based on the type of device - 
+found in Source - that the user use. Include the legends.
+
+```{r,vector = TRUE}
+encodeSource <- function(x) {
+  if(grepl(">Twitter for iPhone</a>", x)){
+    "iphone"
+  }else if(grepl(">Twitter for iPad</a>", x)){
+    "ipad"
+  }else if(grepl(">Twitter for Android</a>", x)){
+    "android"
+  } else if(grepl(">Twitter Web Client</a>", x)){
+    "Web"
+  } else if(grepl(">Twitter for Windows Phone</a>", x)){
+    "windows phone"
+  }else if(grepl(">dlvr.it</a>", x)){
+    "dlvr.it"
+  }else if(grepl(">IFTTT</a>", x)){
+    "ifttt"
+  }else if(grepl(">Facebook</a>", x)){  
+    "facebook"
+  }else {
+    "others"
+  }
+}
+
+
+tweetsDF$tweetSource = sapply(tweetsDF$statusSource, 
+                              encodeSource)
+
+tweet_appSource <- tweetsDF %>% 
+  select(tweetSource) %>%
+  group_by(tweetSource) %>%
+  summarize(count=n()) %>%
+  arrange(desc(count)) 
+
+tweetsDF$tweetSource = sapply(tweetsDF$statusSource, 
+                              encodeSource)
+
+tweet_appSource <- tweetsDF %>% 
+  select(tweetSource) %>%
+  group_by(tweetSource) %>%
+  summarize(count=n()) %>%
+  arrange(desc(count)) 
+```
+\hfill\break
+\hfill\break
+
+```{r,vector = TRUE}
+ggplot(tweetsDF[tweetsDF$tweetSource != 'others',], aes(tweetSource, fill = tweetSource)) +
+  geom_bar() +
+  theme(legend.position="right",
+        axis.title.x = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ylab("Number of tweets")+
+  ggtitle("Tweets by Source")
+
+```
+
+Create a wordcloud from the screenName
+```{r,vector = TRUE}
+tweet_appScreen <- tweetsDF %>%
+  select(screenName) %>%
+  group_by(screenName) %>%
+  summarize(count=n()) %>%
+  arrange(desc(count)) 
+
+
+namesCorpus <- Corpus(VectorSource(tweetsDF$screenName))
+
+pal <- brewer.pal(8, "Dark2")
+pal <- pal[-(1:4)]
+set.seed(123)
+
+par(mar = c(0,0,0,0), mfrow = c(1,1))
+
+```
+\hfill\break
+\hfill\break
+
+Wordcloud
+
+```{r,vector = TRUE}
+wordcloud(words = namesCorpus, scale=c(3,0.5),
+          max.words=500,
+          random.order=FALSE,
+          rot.per=0.5,
+          use.r.layout=TRUE,
+          colors=pal)
+```
