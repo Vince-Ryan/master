@@ -1,0 +1,153 @@
+---
+title: 'Project #2'
+author: "Vince Ryan Taghap"
+date: "2022-12-11"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r,vector = TRUE}
+library(twitteR)
+library(dplyr)
+library(rtweet)
+library(ggplot2)
+library(tidytext)
+library(RColorBrewer)
+library(tm)
+library(plotly)
+```
+\hfill\break
+```{r,vector = TRUE}
+CONSUMER_SECRET <- "PvNTAZrNQNUPf655uhQGDvqnBhEkOtdnCUChsPooSBWrMeCdj6"
+CONSUMER_KEY <- "0eKM7ywAbJIBhoc6qUtPGZ2gc"
+ACCESS_SECRET <- "qSvpFsynx6zadfrSvrTaihnqm4jfZ4XNEI6F6LwmWJ2B7"
+ACCESS_TOKEN <- "1594992291864727553-wz6TgceS7HWYmZ7Tvn05kMNFAOBkaw"
+```
+\hfill\break
+```{r,vector = TRUE}
+setup_twitter_oauth(consumer_key = CONSUMER_KEY,
+                    consumer_secret = CONSUMER_SECRET,
+                    access_token = ACCESS_TOKEN,
+                    access_secret = ACCESS_SECRET)
+```
+\hfill\break
+Extract 10000 tweets from Twitter using twitteR package including retweets
+
+```{r,vector = TRUE}
+NBAtweets <- searchTwitter("NBA",
+                      n=10000,
+                      since = "2022-12-05",
+                      until = "2022-12-11",
+                      lang = "en",
+                      retryOnRateLimit = 120
+                      )
+```
+
+\hfill\break
+Convert into Data Frame
+\hfill\break
+```{r,vector = TRUE}
+NBAdf <- twListToDF(NBAtweets)
+head(NBAdf$text)[1:5]
+```
+\hfill\break
+Saving and loading the Data Frame
+\hfill\break
+```{r,vector = TRUE}
+save(NBAdf,file = "NBAdf.Rdata")
+load(file = "NBAdf.Rdata")
+```
+\hfill\break
+----Original Tweets-----
+\hfill\break
+
+Subsetting original tweets
+\hfill\break
+```{r,vector = TRUE}
+tweetsNBA <- NBAdf %>%
+  select(screenName,text,created,isRetweet) %>% filter(isRetweet == FALSE)
+```
+
+\hfill\break
+Saving and loading Original Tweets
+```{r,vector = TRUE}
+save(tweetsNBA,file = "Original_Tweetsdf.Rdata")
+load(file = "Original_Tweetsdf.Rdata")
+```
+
+\hfill\break
+Grouping the data created
+\hfill\break
+```{r,vector = TRUE}
+tweetsNBA %>%  
+  group_by(1) %>%  
+  summarise(max = max(created), min = min(created))
+
+data1 <- tweetsNBA %>%  mutate(Created_At_Round = created %>% round(units = 'hours')
+                               %>% as.POSIXct())
+
+mn <- tweetsNBA %>% pull(created) %>% min()
+mn 
+mx <- tweetsNBA %>% pull(created) %>% max()
+mx
+```
+\hfill\break
+Plot on original tweets by time.
+\hfill\break
+```{r,vector = TRUE}
+Orig_plot <- ggplot(data1, aes(x = Created_At_Round)) +
+  geom_histogram(aes(fill = ..count..)) +
+  theme(legend.position = "right") +
+  xlab("Time") + ylab("Number of Tweets") + 
+  scale_fill_gradient(low = "midnightblue", high = "aquamarine4")
+
+Orig_plot %>% ggplotly()
+```
+\hfill\break
+================================================================================
+\hfill\break
+
+----ReTweets----
+\hfill\break
+
+Subsetting retweets
+\hfill\break
+```{r,vector = TRUE}
+NBA_retweets <- NBAdf %>%
+  select(screenName,text,created, isRetweet) %>% filter(isRetweet == TRUE)
+```
+
+Saving and loading ReTweets
+```{r,vector = TRUE}
+save(NBA_retweets,file = "ReTweetsdf.Rdata")
+load(file = "ReTweetsdf.Rdata")
+```
+
+\hfill\break
+Grouping the data created
+\hfill\break
+```{r,vector = TRUE}
+NBA_retweets %>%  
+  group_by(1) %>%  
+  summarise(max = max(created), min = min(created))
+
+data2 <- NBA_retweets %>%  mutate(Created_At_Round = created %>% round(units = 'hours') %>% as.POSIXct())
+
+mn <- NBA_retweets %>% pull(created) %>% min()
+mn 
+mx <- NBA_retweets %>% pull(created) %>% max()
+mx
+```
+\hfill\break
+Plot on reTweets by time
+\hfill\break
+```{r,vector = TRUE}
+reTweet_plot <- ggplot(data2, aes(x = Created_At_Round)) +
+  geom_histogram(aes(fill = ..count..)) +
+  theme(legend.position = "right") +
+  xlab("Time") + ylab("Number of ReTweets") + 
+  scale_fill_gradient(low = "midnightblue", high = "aquamarine4")
+
+reTweet_plot %>% ggplotly()
+```
